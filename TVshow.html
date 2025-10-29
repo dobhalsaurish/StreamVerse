@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TV Shows - Stream Verse</title>
+  <style>
+    * { box-sizing: border-box; margin:0; padding:0; }
+    body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #141414; color: white; }
+    a { text-decoration: none; color: inherit; }
+
+    .navbar {
+      position: fixed; top: 0; width: 100%; height: 60px; background: rgba(0,0,0,0.95);
+      display: flex; align-items: center; justify-content: space-between; padding: 0 50px; z-index: 100;
+    }
+    .navbar .logo { font-weight: 700; font-size: 24px; letter-spacing: 1px; color: #e50914; cursor: pointer; }
+    .navbar .nav-links { display: flex; align-items: center; gap: 20px; }
+    .navbar .nav-links a { font-size: 14px; color: #e5e5e5; font-weight: 500; transition: color 0.2s; }
+    .navbar .nav-links a:hover { color: #fff; }
+    .navbar .nav-links a.active { color: #fff; font-weight: 700; }
+    .navbar .user-profile { 
+      width: 32px; height: 32px; border-radius: 4px; 
+      background: linear-gradient(135deg,#e50914 0%,#ff3d47 100%); cursor: pointer; 
+    }
+
+    .hero {
+      height: 70vh;
+      background: linear-gradient(to bottom,rgba(0,0,0,0.5) 0%,#141414 100%),
+                  url('https://placehold.co/1920x1080/000000/ffffff?text=Stream+Verse+TV+Shows') center/cover no-repeat;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      text-align: center;
+      padding-top: 60px;
+      position: relative;
+    }
+    .hero h1 { font-size: 4em; margin-bottom: 10px; z-index: 1; font-weight: 700; }
+    .hero p { font-size: 1.2em; margin-bottom: 30px; z-index: 1; }
+
+    .search-bar {
+      display: flex; align-items: center; justify-content: center;
+      gap: 10px; margin-bottom: 20px; z-index: 1;
+    }
+    .search-bar input {
+      padding: 10px 20px;
+      width: 350px;
+      border: 1px solid #444;
+      border-radius: 8px;
+      background: #333;
+      color: white;
+      font-size: 16px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-bar input:focus { border-color: #e50914; }
+    .search-bar button {
+      background-color: #e50914;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .search-bar button:hover { background-color: #ff3d47; transform: translateY(-1px); }
+    .search-bar button:active { transform: translateY(0); }
+
+    .content { padding: 40px 50px; }
+    .row { margin-bottom: 40px; }
+    .row h2 { font-size: 22px; margin-bottom: 15px; font-weight: 700; }
+    .row-cards {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding-bottom: 20px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .row-cards::-webkit-scrollbar { display: none; }
+
+    .card {
+      min-width: 200px;
+      height: 300px;
+      border-radius: 8px;
+      background-color: #222;
+      background-size: cover;
+      background-position: center;
+      cursor: pointer;
+      transition: transform 0.3s, box-shadow 0.3s;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      flex-shrink: 0;
+    }
+    .card:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+      z-index: 5;
+    }
+
+    #searchResultsSection { display: none; }
+
+    .modal {
+      display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%;
+      overflow: auto; background-color: rgba(0,0,0,0.8);
+    }
+    .modal-content {
+      background-color: #1a1a1a; margin: 5% auto; padding: 30px; border-radius: 12px;
+      width: 90%; max-width: 800px; display: flex; gap: 20px; 
+      box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+    }
+    .close { 
+      color: #aaa; float: right; font-size: 28px; font-weight: bold; 
+      cursor: pointer; transition: color 0.2s; 
+    }
+    .close:hover { color: #e50914; }
+    .modal-poster { 
+      width: 300px; height: 400px; border-radius: 6px; 
+      object-fit: cover; flex-shrink: 0;
+    }
+    .modal-details { flex-grow: 1; }
+    .modal-details h2 { color: #e50914; margin-bottom: 15px; font-size: 28px; }
+    .modal-details p { margin-bottom: 15px; line-height: 1.5; color: #ccc; }
+    .modal-buttons { display: flex; gap: 10px; margin-top: 20px; }
+    .modal-buttons button {
+      padding: 10px 20px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .modal-buttons button:hover { opacity: 0.8; }
+    .modal-buttons .play { background-color: #e50914; color: white; }
+    .modal-buttons .list { background-color: #555; color: white; }
+
+    @media (max-width: 768px) {
+      .navbar { padding: 0 20px; }
+      .navbar .nav-links { gap: 10px; }
+      .hero h1 { font-size: 2.5em; }
+      .hero p { display: none; }
+      .search-bar input { width: 250px; }
+      .content { padding: 20px 20px; }
+      .card { min-width: 150px; height: 225px; }
+      .modal-content {
+        flex-direction: column;
+        width: 95%;
+        margin: 10% auto;
+      }
+      .modal-poster { width: 100%; height: auto; max-height: 300px; }
+      .modal-details h2 { font-size: 2em; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="navbar">
+    <div class="logo" onclick="window.location.href='home.html'">STREAM VERSE</div>
+    <div class="nav-links">
+      <a href="home.html">Home</a>
+      <a href="TVshow.html" class="active">TV Shows</a>
+      <a href="movie.html">Movies</a>
+      <a href="mylist.html">My List</a>
+      <a href="watchparty.html">Watch Party</a>
+      <div class="user-profile" onclick="window.location.href='index.html'"></div>
+    </div>
+  </div>
+
+  <div class="hero">
+    <h1>TV Shows</h1>
+    <p>Binge-watch your favorite series</p>
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search for TV shows..." />
+      <button id="searchBtn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div id="searchResultsSection" class="row">
+      <h2>Search Results</h2>
+      <div class="row-cards" id="searchResults"></div>
+    </div>
+
+    <div class="row">
+      <h2>Trending Now</h2>
+      <div class="row-cards" id="trendingShows"></div>
+    </div>
+
+    <div class="row">
+      <h2>Popular on Stream Verse</h2>
+      <div class="row-cards" id="popularShows"></div>
+    </div>
+
+    <div class="row">
+      <h2>New Releases</h2>
+      <div class="row-cards" id="newShows"></div>
+    </div>
+  </div>
+
+  <div id="showModal" class="modal">
+    <div class="modal-content">
+      <span class="close" id="closeModal">&times;</span>
+      <img id="modalPoster" class="modal-poster" src="" alt="Poster" />
+      <div class="modal-details">
+        <h2 id="modalTitle"></h2>
+        <p id="modalPlot"></p>
+        <div class="modal-buttons">
+          <button class="play" id="watchNowBtn">▶ Watch Now</button>
+          <button class="list" id="myListBtn">+ Add to My List</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = 'https://aenikubkzquqjbnwiojn.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFlbmlrdWJrenF1cWpibndpb2puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE2NzQzOTUsImV4cCI6MjA3NzI1MDM5NX0.ymt7BEAdA9mjd4XERYGiRhJzzdmRbGpZXIROXM_bBzo';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const shows = {
+      trending: [1, 2, 4, 6, 8, 10, 12, 14, 16, 18],
+      popular: [3, 5, 7, 9, 11, 13, 15, 17, 19, 21],
+      new: [20, 22, 24, 26, 28, 30, 32, 34, 36, 38],
+    };
+
+    let currentShow = null;
+    let currentUser = null;
+
+    async function checkAuth() {
+        const { data: { session } } = await supabase.auth.getSession();
+        currentUser = session?.user || null;
+    }
+
+    function showModal(title, plot, posterUrl) {
+      currentShow = { title, poster: posterUrl };
+      document.getElementById("modalTitle").textContent = title;
+      document.getElementById("modalPlot").innerHTML = plot || "No plot summary available.";
+      document.getElementById("modalPoster").src = posterUrl || "https://placehold.co/300x400/141414/e50914?text=No+Poster";
+      document.getElementById("showModal").style.display = "block";
+    }
+
+    function closeModal() {
+      document.getElementById("showModal").style.display = "none";
+    }
+
+    document.getElementById("closeModal").onclick = closeModal;
+    window.onclick = e => { if (e.target === document.getElementById("showModal")) closeModal(); };
+
+    document.getElementById("myListBtn").onclick = async () => {
+      if (!currentUser) {
+        alert('Please sign in to add items to your list.');
+        window.location.href = 'index.html';
+        return;
+      }
+
+      if (!currentShow) return;
+
+      try {
+        const { data, error } = await supabase
+          .from('user_lists')
+          .insert([{
+            user_id: currentUser.id,
+            title: currentShow.title,
+            type: 'show',
+            poster: currentShow.poster !== 'https://placehold.co/300x400/141414/e50914?text=No+Image' ? currentShow.poster : null
+          }]);
+
+        if (error) {
+          if (error.code === '23505') {
+            alert('This show is already in your list!');
+          } else {
+            throw error;
+          }
+        } else {
+          alert(`"${currentShow.title}" has been added to My List!`);
+        }
+      } catch (error) {
+        console.error('Error adding to list:', error);
+        alert('Failed to add to list. Please try again.');
+      }
+    };
+
+    document.getElementById("watchNowBtn").onclick = () => {
+      alert(`Playing "${currentShow.title}"... (Note: This is a demo. No video will play)`);
+    };
+
+    function createCard(show, container) {
+      const summary = show.summary ? show.summary.replace(/<[^>]+>/g, '') : 'No summary available.';
+      const poster = show.image && show.image.medium ? show.image.medium : 'https://placehold.co/300x400/141414/e50914?text=No+Image';
+
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.style.backgroundImage = `url(${poster})`;
+      card.onclick = () => showModal(show.name, summary, poster);
+      container.appendChild(card);
+    }
+
+    async function fetchShow(id) {
+      try {
+        const res = await fetch(`https://api.tvmaze.com/shows/${id}`);
+        const data = await res.json();
+        return data;
+      } catch (error) {
+        console.error("Fetch error for show ID:", id, error);
+        return null;
+      }
+    }
+
+    async function loadShows(category, ids) {
+      const container = document.getElementById(`${category}Shows`);
+      container.innerHTML = "";
+
+      for (const id of ids) {
+        const show = await fetchShow(id);
+        if (show) createCard(show, container);
+      }
+    }
+
+    document.getElementById("searchBtn").onclick = async () => {
+      const query = document.getElementById("searchInput").value.trim();
+      const section = document.getElementById("searchResultsSection");
+      const resultsContainer = document.getElementById("searchResults");
+      resultsContainer.innerHTML = "";
+
+      if (!query) {
+        section.style.display = "none";
+        return;
+      }
+
+      try {
+        const res = await fetch(`https://api.tvmaze.com/search/shows?q=${encodeURIComponent(query)}`);
+        const data = await res.json();
+
+        if (data.length === 0) {
+          resultsContainer.innerHTML = "<p style='padding: 20px; font-size: 1.1em; color: #aaa;'>No TV shows found matching your query.</p>";
+          section.style.display = "block";
+        } else {
+          section.style.display = "block";
+          data.slice(0, 10).forEach(item => createCard(item.show, resultsContainer));
+          section.scrollIntoView({ behavior: "smooth" });
+        }
+      } catch (error) {
+        console.error("Search error:", error);
+        resultsContainer.innerHTML = "<p style='padding: 20px; color: #e50914;'>An error occurred during search.</p>";
+        section.style.display = "block";
+      }
+    };
+
+    document.getElementById("searchInput").addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        document.getElementById("searchBtn").click();
+      }
+    });
+
+    async function init() {
+      await checkAuth();
+      await loadShows("trending", shows.trending);
+      await loadShows("popular", shows.popular);
+      await loadShows("new", shows.new);
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>

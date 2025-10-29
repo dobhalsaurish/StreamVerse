@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">Loading Stream...</title>
+    <style>
+        /* --- General Reset & Base Styles (Copied from movie.html) --- */
+        * { box-sizing: border-box; margin:0; padding:0; }
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #141414; color: white; min-height: 100vh; }
+        a { text-decoration: none; color: inherit; }
+
+        /* --- Navbar Styles (Copied from movie.html) --- */
+        .navbar {
+            position: fixed; top: 0; width: 100%; height: 60px; background: rgba(0,0,0,0.95);
+            display: flex; align-items: center; justify-content: space-between; padding: 0 50px; z-index: 100;
+        }
+        .navbar .logo { font-weight: 700; font-size: 24px; letter-spacing: 1px; color: #e50914; cursor: pointer; }
+        .navbar .nav-links { display: flex; align-items: center; gap: 20px; }
+        .navbar .nav-links a { font-size: 14px; color: #e5e5e5; font-weight: 500; transition: color 0.2s; }
+        .navbar .nav-links a:hover { color: #fff; }
+        .navbar .user-profile { 
+          width:32px; height:32px; border-radius:4px; 
+          background:linear-gradient(135deg,#e50914 0%,#ff3d47 100%); cursor:pointer;
+        }
+
+        /* --- Player Styles --- */
+        .player-container { 
+            max-width: 1200px; margin: 0 auto; padding: 80px 20px 20px; /* Added top padding to clear navbar */
+        }
+        h1 { margin-bottom: 20px; color: white; text-align: center; font-size: 2.5em; }
+        #playerFrame { border-radius: 10px; }
+        .loading-state, .error-state { 
+            text-align: center; padding: 50px; font-size: 1.2em; 
+        }
+        .back-button {
+            display: block; margin: 0 auto 20px; background: #333; color: white; border: none;
+            padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 1em;
+            width: fit-content; transition: background 0.2s;
+        }
+        .back-button:hover { background: #555; }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <div class="logo" onclick="window.location.href='home.html'">STREAM VERSE</div>
+        <div class="nav-links">
+            <a href="home.html">Home</a>
+            <a href="TVshow.html">TV Shows</a>
+            <a href="movie.html">Movies</a>
+            <a href="mylist.html">My List</a>
+            <a href="watchparty.html">Watch Party</a>
+            <div class="user-profile" onclick="window.location.href='index.html'"></div>
+        </div>
+    </div>
+    <div class="player-container">
+        <button class="back-button" onclick="history.back()">← Back to Details</button>
+        <h1 id="movieTitle"></h1>
+        
+        <div id="statusMessage" class="loading-state">
+            Loading movie stream... This may take a moment.
+        </div>
+        
+        <div id="playerEmbed" style="display: none;">
+            </div>
+
+    </div>
+
+    <script src="config.js"></script>
+    <script>
+        // NOTE: TMDB_API_KEY must be added to your config.js file for this to work
+        const TMDB_API_KEY = '090b95b692412744d12ac3870bdc443b'; 
+        
+        async function getTmdbId(imdbId) {
+            // Using TMDB API to convert external ID (IMDb) to internal ID (TMDB)
+            const url = `https://api.themoviedb.org/3/find/${imdbId}?external_source=imdb_id&api_key=${TMDB_API_KEY}`;
+            
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.movie_results && data.movie_results.length > 0) {
+                    return data.movie_results[0].id;
+                }
+                return null;
+            } catch (error) {
+                console.error("Error fetching TMDB ID:", error);
+                return null;
+            }
+        }
+
+        async function loadPlayer() {
+            const params = new URLSearchParams(window.location.search);
+            const imdbId = params.get('imdb');
+            const title = params.get('title');
+
+            const status = document.getElementById('statusMessage');
+            const playerEmbed = document.getElementById('playerEmbed');
+            const movieTitleElem = document.getElementById('movieTitle');
+            
+            if (title) {
+                movieTitleElem.textContent = decodeURIComponent(title);
+                document.getElementById('pageTitle').textContent = `Watching: ${decodeURIComponent(title)}`;
+            } else {
+                movieTitleElem.textContent = 'Movie Player';
+            }
+
+            if (!imdbId) {
+                status.className = 'error-state';
+                status.textContent = 'Error: No movie ID provided in the URL.';
+                return;
+            }
+
+            status.textContent = `Finding streaming ID for ${imdbId}...`;
+            
+            // 1. Convert IMDb ID to TMDB ID
+            const tmdbId = await getTmdbId(imdbId);
+
+            if (!tmdbId) {
+                status.className = 'error-state';
+                status.textContent = `Error: Could not find streaming ID for the movie. Please check if your TMDB_API_KEY is correct. (IMDb ID: ${imdbId})`;
+                return;
+            }
+            
+            // 2. Load Iframe
+            status.style.display = 'none';
+            playerEmbed.style.display = 'block';
+
+            const iframe = document.createElement('iframe');
+            // This is the specific URL structure you requested
+            iframe.src = `https://www.vidking.net/embed/movie/${tmdbId}`; 
+            iframe.width = "100%";
+            iframe.height = "600";
+            iframe.frameborder = "0";
+            iframe.allowfullscreen = true;
+            iframe.id = "playerFrame";
+            
+            playerEmbed.appendChild(iframe);
+        }
+
+        // Basic handleLogout placeholder
+        window.handleLogout = () => {
+             // Since we don't have the full Supabase logic here, we'll just redirect
+             window.location.href = 'index.html'; 
+        }
+
+        window.onload = loadPlayer;
+    </script>
+</body>
+</html>

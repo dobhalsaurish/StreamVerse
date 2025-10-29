@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Home - Stream Verse</title>
+<style>
+  * { box-sizing: border-box; margin:0; padding:0; }
+  body { font-family: 'Helvetica Neue', Arial, sans-serif; background:#141414; color:white; }
+  a { text-decoration: none; color: inherit; }
+
+  .navbar {
+    position: fixed; top:0; width:100%; height:60px; background: rgba(0,0,0,0.95);
+    display:flex; align-items:center; justify-content:space-between; padding:0 50px; z-index:100;
+  }
+  .navbar .logo { font-weight:700; font-size:24px; letter-spacing:1px; color:#e50914; cursor:pointer; }
+  .navbar .nav-links { display:flex; align-items:center; gap:20px; }
+  .navbar .nav-links a { font-size:14px; color:#e5e5e5; font-weight:500; transition: color 0.2s; }
+  .navbar .nav-links a:hover { color:#fff; }
+  .navbar .nav-links a.active { color:#fff; font-weight:700; }
+  .navbar .user-profile { 
+    width:32px; height:32px; border-radius:4px; 
+    background:linear-gradient(135deg,#e50914 0%,#ff3d47 100%); cursor:pointer; 
+  }
+
+  .hero { 
+    height: 70vh; 
+    background:linear-gradient(to bottom,rgba(0,0,0,0.3) 0%,#141414 100%), 
+               url('https://placehold.co/1920x1080/000000/ffffff?text=Stream+Verse') center/cover no-repeat;
+    display:flex; flex-direction:column; justify-content:center; align-items:flex-start; 
+    padding:0 50px; padding-top:60px;
+  }
+  .hero h1 { font-size:56px; margin-bottom:20px; font-weight:700; }
+  .hero p { font-size:20px; margin-bottom:30px; max-width:600px; line-height:1.4; }
+  .hero-buttons button { 
+    padding:14px 32px; margin-right:15px; border:none; border-radius:4px; 
+    cursor:pointer; font-weight:700; font-size:16px; transition: opacity 0.2s;
+  }
+  .hero-buttons button:hover { opacity: 0.8; }
+  .btn-play { background:white; color:black; }
+  .btn-info { background:rgba(109,109,110,0.7); color:white; }
+
+  .content-section { margin-top:20px; }
+  .row { margin: 30px 50px; }
+  .row h2 { margin-bottom:15px; font-size:22px; font-weight:700; }
+  .row-cards { 
+    display:flex; overflow-x:auto; gap:12px; padding-bottom:15px;
+    scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  }
+  .row-cards::-webkit-scrollbar { display:none; }
+  .card { 
+    min-width:200px; height:300px; border-radius:8px; flex-shrink:0; 
+    cursor:pointer; background-size:cover; background-position:center; 
+    position:relative; transition: transform 0.3s, box-shadow 0.3s;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    background-color: #222;
+  }
+  .card:hover { 
+    transform:scale(1.05); 
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+    z-index: 5;
+  }
+
+  .modal { 
+    display:none; position:fixed; top:0; left:0; width:100%; height:100%; 
+    background:rgba(0,0,0,0.8); justify-content:center; align-items:center; z-index:200;
+    overflow: auto;
+  }
+  .modal-content { 
+    background:#1a1a1a; margin: 5% auto; padding:30px; border-radius:12px; 
+    width:90%; max-width:800px; position:relative; color:white;
+    display: flex; gap: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+  }
+  .modal-poster { 
+    width: 300px; height: 400px; border-radius: 6px; 
+    object-fit: cover; flex-shrink: 0;
+  }
+  .modal-details { flex-grow: 1; }
+  .modal-details h2 { color: #e50914; margin-bottom:15px; font-size: 28px; }
+  .modal-details p { margin-bottom:15px; line-height:1.5; color: #ccc; }
+  .close { 
+    position:absolute; top:10px; right:20px; font-size:28px; 
+    cursor:pointer; color:#aaa; font-weight: bold; transition: color 0.2s;
+  }
+  .close:hover { color:#e50914; }
+  .modal-buttons { display: flex; gap: 10px; margin-top: 20px; }
+  .modal-buttons button {
+    padding: 10px 20px; border: none; border-radius: 5px; 
+    font-weight: bold; cursor: pointer; transition: opacity 0.2s;
+  }
+  .modal-buttons button:hover { opacity: 0.8; }
+  .modal-buttons .play { background-color: #e50914; color: white; }
+  .modal-buttons .list { background-color: #555; color: white; }
+
+  @media(max-width:768px){ 
+    .navbar { padding: 0 20px; }
+    .navbar .nav-links { gap: 10px; }
+    .hero { padding: 80px 20px 20px; }
+    .hero h1 { font-size:36px; } 
+    .hero p { font-size:16px; } 
+    .row { margin:20px 20px; }
+    .card { min-width:150px; height:225px; }
+    .modal-content { 
+      flex-direction: column; width: 95%; margin: 10% auto; 
+    }
+    .modal-poster { width: 100%; height: auto; max-height: 300px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="navbar">
+  <div class="logo" onclick="window.location.href='home.html'">STREAM VERSE</div>
+  <div class="nav-links">
+    <a href="home.html" class="active">Home</a>
+    <a href="TVshow.html">TV Shows</a>
+    <a href="movie.html">Movies</a>
+    <a href="mylist.html">My List</a>
+    <a href="watchparty.html">Watch Party</a>
+    <div class="user-profile" onclick="window.location.href='index.html'"></div>
+  </div>
+</div>
+
+<div class="hero">
+  <h1>Unlimited Entertainment</h1>
+  <p>Watch anywhere. Cancel anytime. Stream the latest movies and TV shows on demand.</p>
+  <div class="hero-buttons">
+    <button class="btn-play">▶ Play</button>
+    <button class="btn-info">ℹ More Info</button>
+  </div>
+</div>
+
+<div class="content-section">
+  <div class="row" id="movies-row">
+    <h2>Trending Movies</h2>
+    <div class="row-cards" id="movies-cards"></div>
+  </div>
+
+  <div class="row" id="tv-row">
+    <h2>Popular TV Shows</h2>
+    <div class="row-cards" id="tv-cards"></div>
+  </div>
+</div>
+
+<div class="modal" id="modal">
+  <div class="modal-content">
+    <span class="close" id="modal-close">&times;</span>
+    <img id="modal-image" class="modal-poster" src="" alt="Poster">
+    <div class="modal-details">
+      <h2 id="modal-title"></h2>
+      <p id="modal-desc"></p>
+      <div class="modal-buttons">
+        <button class="play">▶ Watch Now</button>
+        <button class="list" id="add-to-list-btn">+ Add to My List</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPABASE_URL = 'https://aenikubkzquqjbnwiojn.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFlbmlrdWJrenF1cWpibndpb2puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE2NzQzOTUsImV4cCI6MjA3NzI1MDM5NX0.ymt7BEAdA9mjd4XERYGiRhJzzdmRbGpZXIROXM_bBzo';
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  const OMDB_API_KEY = 'd368ac0e';
+  const moviesTitles = ['Inception','The Matrix','Interstellar','The Dark Knight','Avatar'];
+  const tvShowsIDs = [82,431,169,143,73];
+
+  const moviesCards = document.getElementById('movies-cards');
+  const tvCards = document.getElementById('tv-cards');
+
+  const modal = document.getElementById('modal');
+  const modalTitle = document.getElementById('modal-title');
+  const modalDesc = document.getElementById('modal-desc');
+  const modalImage = document.getElementById('modal-image');
+  const modalClose = document.getElementById('modal-close');
+  const addToListBtn = document.getElementById('add-to-list-btn');
+
+  let currentItem = null;
+  let currentUser = null;
+
+  async function checkAuth() {
+      const { data: { session } } = await supabase.auth.getSession();
+      currentUser = session?.user || null;
+  }
+
+  modalClose.onclick = () => { modal.style.display = 'none'; };
+  window.onclick = (e) => { if(e.target==modal){ modal.style.display='none'; } }
+
+  addToListBtn.onclick = async () => {
+    if (!currentUser) {
+      alert('Please sign in to add items to your list.');
+      window.location.href = 'index.html';
+      return;
+    }
+
+    if (!currentItem) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('user_lists')
+        .insert([{
+          user_id: currentUser.id,
+          title: currentItem.title,
+          type: currentItem.type,
+          poster: currentItem.poster
+        }]);
+
+      if (error) {
+        if (error.code === '23505') {
+          alert('This item is already in your list!');
+        } else {
+          throw error;
+        }
+      } else {
+        alert(`"${currentItem.title}" has been added to My List!`);
+      }
+    } catch (error) {
+      console.error('Error adding to list:', error);
+      alert('Failed to add to list. Please try again.');
+    }
+  };
+
+  async function loadMovies() {
+    for(const title of moviesTitles){
+      try{
+        const res = await fetch(`https://www.omdbapi.com/?t=${encodeURIComponent(title)}&apikey=${OMDB_API_KEY}`);
+        const data = await res.json();
+        if(data.Response==='True'){
+          const card = document.createElement('div');
+          card.className='card';
+          card.style.backgroundImage = `url(${data.Poster})`;
+          card.onclick = () => showModal(data.Title, data.Plot, data.Poster, 'movie');
+          moviesCards.appendChild(card);
+        }
+      } catch(err){ console.log(err); }
+    }
+  }
+
+  async function loadTVShows() {
+    for(const id of tvShowsIDs){
+      try{
+        const res = await fetch(`https://api.tvmaze.com/shows/${id}`);
+        const data = await res.json();
+        const summary = data.summary ? data.summary.replace(/<[^>]+>/g,'') : 'No summary available.';
+        const poster = data.image && data.image.medium ? data.image.medium : 'https://placehold.co/300x400/141414/e50914?text=No+Poster';
+        
+        const card = document.createElement('div');
+        card.className='card';
+        card.style.backgroundImage = `url(${poster})`;
+        card.onclick = () => showModal(data.name, summary, poster, 'show');
+        tvCards.appendChild(card);
+      } catch(err){ console.log(err); }
+    }
+  }
+
+  function showModal(title, desc, img, type){
+    currentItem = {
+      title: title,
+      poster: img !== 'https://placehold.co/300x400/141414/e50914?text=No+Poster' ? img : null,
+      type: type
+    };
+    modalTitle.textContent = title;
+    modalDesc.textContent = desc;
+    modalImage.src = img;
+    modal.style.display = 'flex';
+  }
+
+  async function init() {
+    await checkAuth();
+    loadMovies();
+    loadTVShows();
+  }
+
+  init();
+</script>
+
+</body>
+</html>

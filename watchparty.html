@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Watch Party - Stream Verse</title>
+  <style>
+    /* Reusing your existing styles for consistency */
+    * { box-sizing: border-box; margin:0; padding:0; }
+    body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #141414; color: white; min-height: 100vh; }
+    a { text-decoration: none; color: inherit; }
+
+    .navbar {
+      position: fixed; top: 0; width: 100%; height: 60px; background: rgba(0,0,0,0.95);
+      display: flex; align-items: center; justify-content: space-between; padding: 0 50px; z-index: 100;
+    }
+    .navbar .logo { font-weight: 700; font-size: 24px; letter-spacing: 1px; color: #e50914; cursor: pointer; }
+    .navbar .nav-links { display: flex; align-items: center; gap: 20px; }
+    .navbar .nav-links a { font-size: 14px; color: #e5e5e5; font-weight: 500; transition: color 0.2s; }
+    .navbar .nav-links a:hover { color: #fff; }
+    .navbar .nav-links .active { color: white; font-weight: 700; }
+    .navbar .user-profile { width:32px; height:32px; border-radius:4px; background:linear-gradient(135deg,#e50914 0%,#ff0022 100%); cursor: pointer; }
+
+    .hero {
+      padding-top: 100px; padding-left: 50px; padding-bottom: 30px;
+      background: linear-gradient(180deg, rgba(0,0,0,0.7), rgba(20,20,20,0.5), rgba(20,20,20,1));
+    }
+    .hero h1 { font-size: 3rem; font-weight: 700; margin-bottom: 5px; }
+    .hero p { font-size: 1.1rem; color: #a3a3a3; }
+
+    .content { padding: 0 50px 50px; display: flex; gap: 40px; }
+    .rooms-section, .chat-section {
+        flex: 1;
+        min-width: 300px;
+    }
+    h2 { font-size: 1.5rem; margin-bottom: 15px; border-left: 5px solid #e50914; padding-left: 10px; }
+
+    /* Room Creation Form */
+    .create-form input[type="text"],
+    .create-form button {
+        padding: 10px; margin-bottom: 10px; border-radius: 4px; border: none;
+    }
+    .create-form input[type="text"] {
+        width: 100%; background: #2c2c2c; color: white;
+    }
+    .create-form button {
+        background-color: #e50914; color: white; cursor: pointer; font-weight: bold; width: 100%;
+    }
+    .create-form button:hover { background-color: #ff3344; }
+
+    /* Room List */
+    #roomsList {
+        display: flex; flex-direction: column; gap: 10px;
+    }
+    .room-card {
+        background: #2c2c2c; padding: 15px; border-radius: 8px; display: flex;
+        justify-content: space-between; align-items: center; transition: background 0.2s;
+    }
+    .room-card:hover { background: #3a3a3a; }
+    .room-card button {
+        background-color: #007bff; color: white; border: none; padding: 8px 15px;
+        border-radius: 4px; cursor: pointer;
+    }
+
+    /* Chat Section */
+    .chat-section { display: none; /* Initially hidden */ flex-direction: column; height: 600px; background: #1e1e1e; padding: 20px; border-radius: 8px; }
+    #chatMessages {
+        flex-grow: 1; overflow-y: auto; background: #141414; padding: 10px; border-radius: 4px; margin-bottom: 10px;
+        display: flex; flex-direction: column; gap: 5px;
+    }
+    .chat-message { padding: 5px 8px; border-radius: 4px; background: #2c2c2c; max-width: 80%; }
+    .chat-message strong { color: #e50914; margin-right: 5px; }
+    #chatInput { display: flex; }
+    #chatInput input { flex-grow: 1; padding: 10px; border-radius: 4px; border: none; background: #2c2c2c; color: white; }
+    #chatInput button { background-color: #e50914; color: white; border: none; padding: 10px 15px; margin-left: 5px; border-radius: 4px; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+  <div class="navbar">
+    <div class="logo" onclick="window.location.href='home.html'">STREAM VERSE</div>
+    <div class="nav-links">
+      <a href="home.html">Home</a>
+      <a href="TVshow.html">TV Shows</a>
+      <a href="movie.html">Movies</a>
+      <a href="mylist.html">My List</a>
+      <a href="watchparty.html" class="active">Watch Party</a>
+      <div class="user-profile" onclick="handleLogout()"></div>
+    </div>
+  </div>
+
+  <div class="hero">
+    <h1>Watch Party</h1>
+    <p>Join or create a room to watch content together in real-time.</p>
+  </div>
+
+  <div class="content">
+    <div class="rooms-section">
+      <h2>Create New Room</h2>
+      <div class="create-form">
+        <input type="text" id="roomName" placeholder="Enter Room Name (e.g., Star Wars Night)">
+        <button onclick="createRoom()">Create Room</button>
+      </div>
+      
+      ---
+
+      <h2>Available Rooms</h2>
+      <div id="roomsList">
+        <div class="empty-state">Loading rooms...</div>
+      </div>
+    </div>
+
+    <div class="chat-section" id="chatContainer">
+      <h2>Room Chat: <span id="currentRoomName"></span></h2>
+      <div id="chatMessages">
+        </div>
+      <div id="chatInput">
+        <input type="text" id="messageText" placeholder="Type your message..." onkeypress="if(event.key === 'Enter') sendMessage()">
+        <button onclick="sendMessage()">Send</button>
+      </div>
+      <button onclick="leaveRoom()" style="margin-top: 10px; background-color: #444;">Leave Room</button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // Supabase Configuration - Retrieved from mylist.html
+    const SUPABASE_URL = 'https://aenikubkzquqjbnwiojn.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFlbmlrdWJrenF1cWpibndpb2puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE2NzQzOTUsImV4cCI6MjA3NzI1MDM5NX0.ymt7BEAdA9mjd4XERYGiRhJzzdmRbGpZXIROXM_bBzo';
+    
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    let currentUser = null;
+    let currentRoomId = null;
+    let chatChannel = null;
+
+    // --- Utility Functions (Modal and Logout) ---
+    // (You would need to copy the full showCustomModal and handleLogout from mylist.html here)
+    // Placeholder implementation for simplicity
+    function showCustomModal(title, message) { alert(`${title}: ${message}`); }
+    async function handleLogout() {
+        if (confirm('Are you sure you want to sign out?')) {
+            await supabase.auth.signOut();
+            window.location.href = 'index.html';
+        }
+    }
+
+    // --- Watch Party Logic ---
+
+    async function checkAuth() {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session) {
+            window.location.href = 'index.html';
+            return;
+        }
+
+        currentUser = session.user;
+        loadRooms();
+    }
+    
+    // 1. Loading Rooms
+    async function loadRooms() {
+        const { data, error } = await supabase
+            .from('watch_party_rooms')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        const roomsList = document.getElementById('roomsList');
+        roomsList.innerHTML = '';
+        
+        if (error) {
+            roomsList.innerHTML = '<div class="empty-state">Error loading rooms.</div>';
+            console.error("Error loading rooms:", error);
+            return;
+        }
+
+        if (data.length === 0) {
+            roomsList.innerHTML = '<div class="empty-state">No rooms available. Create one!</div>';
+        } else {
+            data.forEach(room => {
+                const card = document.createElement('div');
+                card.className = 'room-card';
+                card.innerHTML = `
+                    <span>${room.name} (Created by: ${room.creator_email || 'Unknown'})</span>
+                    <button onclick="joinRoom('${room.id}', '${room.name}')">Join</button>
+                `;
+                roomsList.appendChild(card);
+            });
+        }
+        
+        // Listen for real-time room changes
+        supabase
+            .channel('rooms_changes')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'watch_party_rooms' }, () => {
+                loadRooms(); // Reload rooms when a room is created/deleted
+            })
+            .subscribe();
+    }
+
+    // 2. Creating a Room
+    async function createRoom() {
+        const name = document.getElementById('roomName').value.trim();
+        if (!name) {
+            showCustomModal('Error', 'Please enter a name for the room.');
+            return;
+        }
+
+        const { error } = await supabase
+            .from('watch_party_rooms')
+            .insert({ 
+                name: name,
+                creator_id: currentUser.id,
+                creator_email: currentUser.email // Assuming user email is available
+            });
+
+        if (error) {
+            showCustomModal('Error', 'Failed to create room: ' + error.message);
+        } else {
+            document.getElementById('roomName').value = '';
+            showCustomModal('Success', `Room "${name}" created successfully!`);
+        }
+    }
+
+    // 3. Joining a Room
+    function joinRoom(roomId, roomName) {
+        currentRoomId = roomId;
+        document.getElementById('currentRoomName').textContent = roomName;
+        document.getElementById('chatContainer').style.display = 'flex';
+        document.querySelector('.rooms-section').style.display = 'none';
+
+        // Initialize chat
+        document.getElementById('chatMessages').innerHTML = '';
+        listenToChat(roomId);
+        showCustomModal('Joined', `You have joined the room: ${roomName}`);
+    }
+
+    // 4. Leaving a Room
+    function leaveRoom() {
+        if (chatChannel) {
+            supabase.removeChannel(chatChannel);
+        }
+        currentRoomId = null;
+        document.getElementById('chatContainer').style.display = 'none';
+        document.querySelector('.rooms-section').style.display = 'block';
+        showCustomModal('Left', 'You have left the chat room.');
+    }
+
+    // 5. Chat Real-Time Listener
+    function listenToChat(roomId) {
+        if (chatChannel) {
+             supabase.removeChannel(chatChannel); // Remove old listener if exists
+        }
+        
+        chatChannel = supabase
+            .channel(`room:${roomId}`)
+            .on('postgres_changes', { 
+                event: 'INSERT', 
+                schema: 'public', 
+                table: 'room_messages',
+                filter: `room_id=eq.${roomId}`
+            }, (payload) => {
+                displayMessage(payload.new);
+            })
+            .subscribe((status) => {
+                if (status === 'SUBSCRIBED') {
+                    // Load existing messages on initial subscription
+                    loadChatHistory(roomId);
+                }
+            });
+    }
+
+    // 6. Load Chat History
+    async function loadChatHistory(roomId) {
+        const { data, error } = await supabase
+            .from('room_messages')
+            .select('*')
+            .eq('room_id', roomId)
+            .order('sent_at', { ascending: true });
+
+        if (error) {
+            console.error("Error loading chat history:", error);
+            return;
+        }
+
+        data.forEach(displayMessage);
+    }
+
+    // 7. Send Message
+    async function sendMessage() {
+        const text = document.getElementById('messageText').value.trim();
+        if (!text || !currentRoomId) return;
+
+        const { error } = await supabase
+            .from('room_messages')
+            .insert({
+                room_id: currentRoomId,
+                user_id: currentUser.id,
+                sender_email: currentUser.email, // Use email as username display
+                message_text: text
+            });
+
+        if (error) {
+            console.error("Error sending message:", error);
+        } else {
+            document.getElementById('messageText').value = '';
+        }
+    }
+
+    // 8. Display Message
+    function displayMessage(message) {
+        const messagesContainer = document.getElementById('chatMessages');
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'chat-message';
+        
+        // Determine if the message is from the current user
+        if (message.user_id === currentUser.id) {
+            msgDiv.style.alignSelf = 'flex-end';
+            msgDiv.style.backgroundColor = '#e50914';
+            msgDiv.innerHTML = `<span>${message.message_text}</span>`;
+        } else {
+            msgDiv.innerHTML = `<strong>${message.sender_email.split('@')[0]}:</strong> <span>${message.message_text}</span>`;
+        }
+
+        messagesContainer.appendChild(msgDiv);
+        // Scroll to bottom
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    window.onload = checkAuth;
+  </script>
+</body>
+</html>
