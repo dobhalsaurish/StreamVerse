@@ -39,184 +39,230 @@
       z-index: -1;
     }
 
-    .main-content {
-      flex-grow: 1;
+    .form-container {
       display: flex;
       justify-content: center;
       align-items: center;
+      flex-grow: 1;
       padding: 20px;
     }
 
-    .login-box {
-      background: rgba(0, 0, 0, 0.7);
-      padding: 40px;
-      border-radius: 8px;
+    .auth-form {
+      background-color: rgba(0,0,0,0.85);
+      padding: 60px;
+      border-radius: 12px;
       width: 100%;
       max-width: 450px;
-      box-shadow: 0 4px 25px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
     }
-    .login-box h1 {
-      font-size: 2rem;
+
+    .auth-form h2 {
+      font-size: 2em;
       margin-bottom: 25px;
-      text-align: left;
+      text-align: center;
+      color: #e50914;
     }
 
-    .login-box input {
-      width: 100%;
-      padding: 15px;
-      margin-bottom: 16px;
-      border: none;
-      border-radius: 4px;
-      background: #333;
-      color: #fff;
-      font-size: 1rem;
-    }
-    .login-box input::placeholder {
-      color: #8c8c8c;
+    .input-group {
+      margin-bottom: 20px;
     }
 
-    .login-box button {
+    .input-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      font-size: 0.9em;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #333;
+      border-radius: 6px;
+      background-color: #333;
+      color: #fff;
+      font-size: 1em;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+    .input-group input:focus {
+      border-color: #e50914;
+      background-color: #444;
+    }
+
+    .auth-form button {
       width: 100%;
       padding: 15px;
-      background: #e50914;
-      color: #fff;
       border: none;
-      border-radius: 4px;
-      font-size: 1rem;
+      border-radius: 6px;
+      background-color: #e50914;
+      color: white;
+      font-size: 1.1em;
       font-weight: bold;
       cursor: pointer;
-      transition: background 0.3s;
-    }
-    .login-box button:hover {
-      background: #ff3344;
-    }
-    .login-box button:disabled {
-      background: #555;
-      cursor: not-allowed;
-    }
-
-    .options {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      transition: background-color 0.3s, opacity 0.3s;
       margin-top: 10px;
-      font-size: 0.85rem;
-      color: #b3b3b3;
     }
-    .options a {
-      color: #b3b3b3;
-      transition: color 0.3s;
+
+    .auth-form button:hover {
+      background-color: #ff3d47;
     }
-    .options a:hover {
+    .auth-form button:disabled {
+      background-color: #555;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    .auth-form p {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 0.9em;
+    }
+    .auth-form p a {
+      color: #e50914;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .auth-form p a:hover {
       text-decoration: underline;
     }
 
-    .signup {
-      margin-top: 30px;
-      font-size: 1rem;
-      color: #8c8c8c;
+    /* Forgot Password Link Styling */
+    .forgot-password {
+        display: block;
+        text-align: right;
+        font-size: 0.85em;
+        margin-top: -15px;
+        margin-bottom: 15px;
     }
-    .signup a {
-      color: #fff;
-      font-weight: 500;
-      transition: color 0.3s;
+    .forgot-password a {
+        color: #aaa;
+        text-decoration: none;
+        transition: color 0.2s;
     }
-    .signup a:hover {
-      text-decoration: underline;
+    .forgot-password a:hover {
+        color: #e50914;
+        text-decoration: underline;
     }
 
-    .modal-overlay {
+
+    /* Custom Modal styles */
+    .custom-modal {
         display: none;
         position: fixed;
-        top: 0; left: 0; right: 0; bottom: 0;
-        background: rgba(0, 0, 0, 0.75);
-        z-index: 1000;
-        align-items: center;
+        z-index: 2000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.7);
         justify-content: center;
+        align-items: center;
     }
-    .modal-box {
-        background: #1e1e1e;
-        color: white;
+
+    .modal-content {
+        background-color: #2c2c2c;
         padding: 30px;
-        border-radius: 12px;
-        max-width: 400px;
+        border-radius: 8px;
         width: 90%;
-        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.7);
+        max-width: 400px;
         text-align: center;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.5);
     }
-    .modal-box h3 { margin-bottom: 15px; font-size: 1.5rem; color: #e50914; }
-    .modal-box p { margin-bottom: 25px; line-height: 1.5; }
-    .modal-actions button {
+    .modal-content h3 {
+        color: #e50914;
+        margin-bottom: 15px;
+    }
+    .modal-buttons {
+        margin-top: 20px;
+    }
+    .modal-buttons button {
         background-color: #e50914;
         color: white;
-        border: none;
         padding: 10px 20px;
-        margin: 0 10px;
-        border-radius: 6px;
+        border: none;
+        border-radius: 4px;
         cursor: pointer;
-        transition: background-color 0.2s, transform 0.1s;
         font-weight: bold;
     }
-    .modal-actions button:hover {
-        background-color: #ff3344;
-    }
+
   </style>
 </head>
 <body>
+
   <div class="navbar">
     <div class="logo" onclick="window.location.href='home.html'">STREAM VERSE</div>
-  </div>
-
-  <div class="main-content">
-    <div class="login-box">
-      <h1>Sign In</h1>
-      <form onsubmit="handleLogin(event)">
-        <input type="email" id="email" placeholder="Email" required>
-        <input type="password" id="password" placeholder="Password" required>
-        <button type="submit" id="loginButton">Sign In</button>
-      </form>
-      <div class="options">
-        <label><input type="checkbox"> Remember me</label>
-        <a href="#">Need help?</a>
-      </div>
-      <div class="signup">
-        New to Stream Verse? <a href="signup.html">Sign up now</a>.
-      </div>
     </div>
+
+  <div class="form-container">
+    <form class="auth-form" onsubmit="handleLogin(event)">
+      <h2>Sign In</h2>
+      <div class="input-group">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" required>
+      </div>
+      <div class="input-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" required>
+      </div>
+      <div class="forgot-password">
+          <a href="#" onclick="handlePasswordReset()">Forgot Password?</a>
+      </div>
+      
+      <button type="submit" id="loginButton">Sign In</button>
+
+      <p>New to Stream Verse? <a href="signup.html">Sign up now.</a></p>
+    </form>
   </div>
 
-  <div class="modal-overlay" id="customModal">
-    <div class="modal-box">
-        <h3 id="modalTitle"></h3>
-        <p id="modalMessage"></p>
-        <div class="modal-actions" id="modalActions">
-            <button class="confirm" id="modalConfirm">OK</button>
-        </div>
+  <div id="customModal" class="custom-modal">
+    <div class="modal-content">
+      <h3 id="modalTitle"></h3>
+      <p id="modalMessage"></p>
+      <div class="modal-buttons">
+        <button id="modalConfirm">OK</button>
+      </div>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script> 
   <script>
-    // Supabase Configuration
-    const SUPABASE_URL = 'https://aenikubkzquqjbnwiojn.supabase.co'; // Replace with your Supabase URL
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFlbmlrdWJrenF1cWpibndpb2puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE2NzQzOTUsImV4cCI6MjA3NzI1MDM5NX0.ymt7BEAdA9mjd4XERYGiRhJzzdmRbGpZXIROXM_bBzo'; // Replace with your Supabase Anon Key
-    
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabase = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
 
-    function showCustomModal(title, message, redirect = false) {
+    function showCustomModal(title, message, isConfirmation = false) {
         return new Promise(resolve => {
             const modal = document.getElementById('customModal');
             document.getElementById('modalTitle').textContent = title;
             document.getElementById('modalMessage').textContent = message;
+            const confirmButton = document.getElementById('modalConfirm');
 
-            const confirmBtn = document.getElementById('modalConfirm');
-            const newConfirmBtn = confirmBtn.cloneNode(true);
-            confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+            confirmButton.textContent = isConfirmation ? 'Yes' : 'OK';
+            if (isConfirmation) {
+                // Add a "Cancel" button for confirmation dialogs
+                let cancelButton = document.getElementById('modalCancel');
+                if (!cancelButton) {
+                    cancelButton = document.createElement('button');
+                    cancelButton.id = 'modalCancel';
+                    cancelButton.textContent = 'Cancel';
+                    cancelButton.style.backgroundColor = '#555';
+                    cancelButton.style.marginLeft = '10px';
+                    document.querySelector('.modal-buttons').appendChild(cancelButton);
+                }
+                cancelButton.onclick = () => {
+                    modal.style.display = 'none';
+                    resolve(false);
+                };
+            } else {
+                // Remove cancel button for simple alerts
+                const cancelButton = document.getElementById('modalCancel');
+                if (cancelButton) cancelButton.remove();
+            }
 
-            newConfirmBtn.onclick = () => {
+            confirmButton.onclick = () => {
                 modal.style.display = 'none';
                 resolve(true);
-                if (redirect) window.location.href = 'home.html';
             };
 
             modal.style.display = 'flex';
@@ -240,7 +286,8 @@
 
         if (error) throw error;
 
-        await showCustomModal('Success', 'Login successful! Redirecting...', true);
+        await showCustomModal('Success', 'Login successful! Redirecting...', false);
+        window.location.href = 'home.html';
       } catch (error) {
         console.error("Login Error:", error);
         let errorMessage = "An error occurred during login.";
@@ -258,13 +305,60 @@
       }
     }
 
+    // --- NEW: Password Reset Function ---
+    window.handlePasswordReset = async function() {
+        const emailInput = document.getElementById('email');
+        const email = emailInput.value.trim();
+
+        if (!email) {
+            await showCustomModal('Password Reset', 'Please enter your email address in the field above.', false);
+            emailInput.focus();
+            return;
+        }
+        
+        // Disable the email input and show loading state in the link itself for feedback
+        const resetLink = document.querySelector('.forgot-password a');
+        const originalText = resetLink.textContent;
+        resetLink.textContent = 'Sending...';
+        resetLink.style.pointerEvents = 'none';
+
+        try {
+            const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                 // IMPORTANT: Change 'http://localhost:8080/update-password.html' to the actual URL 
+                 // where you will host your password update page.
+                 // This must also be configured in your Supabase Auth Settings.
+                 redirectTo: `${window.location.origin}/update-password.html` 
+            });
+
+            if (error) throw error;
+
+            await showCustomModal(
+                'Password Reset Email Sent', 
+                `A password recovery email has been sent to ${email}. Please check your inbox and spam folder.`,
+                false
+            );
+
+        } catch (error) {
+            console.error('Password Reset Error:', error);
+            await showCustomModal(
+                'Password Reset Failed', 
+                'Failed to send reset email. Please ensure the email is correct and try again.',
+                false
+            );
+        } finally {
+            resetLink.textContent = originalText;
+            resetLink.style.pointerEvents = 'auto';
+        }
+    }
+
+
     // Check if user is already logged in
     window.onload = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         window.location.href = 'home.html';
       }
-    };
+    }
   </script>
 </body>
 </html>
